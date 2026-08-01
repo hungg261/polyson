@@ -1,0 +1,11 @@
+{
+    "problem_name": "unspecified",
+    "solution_file": "solutions/solution.cpp",
+    "input_extension": ".in",
+    "output_extension": ".out",
+    "source": "unspecified",
+    "time_limit_ms": 1000,
+    "memory_limit_mb": 256,
+    "rating": 0,
+    "tags": ["unspecified"]
+}

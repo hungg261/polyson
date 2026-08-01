@@ -1,0 +1,12 @@
+*.exe
+*.out
+*.o
+*.obj
+
+**/tests/
+
+__pycache__/
+*.pyc
+.DS_Store
+
+*.egg-info/
