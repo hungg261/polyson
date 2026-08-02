@@ -3,6 +3,14 @@
 \newcommand{\Author}{\textbf{Phan Thành Hưng} (tổng hợp)}
 \newcommand{\HeaderL}{Đề thi HSG Tin học}
 \newcommand{\HeaderR}{Phan Thành Hưng - Trường Phổ thông Năng khiếu, ĐHQG TP. HCM}
+\newcommand{\WatermarkText}{PHAN THÀNH HƯNG}
+
+\RequirePackage{etoolbox}
+\newtoggle{ShowTitlePage}\settoggle{ShowTitlePage}{true}
+\newtoggle{ShowTOC}\settoggle{ShowTOC}{true}
+\newtoggle{EnableWatermark}\settoggle{EnableWatermark}{true}
+
+\InputIfFileExists{config_flags.tex}{}{}
 
 \documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{vietnam}
@@ -12,6 +20,7 @@
 \usepackage{listings}
 \usepackage{tcolorbox}
 \usepackage{enumitem}
+\usepackage{lastpage}
 \usepackage[hidelinks]{hyperref}
 \usepackage{float}
 
@@ -50,18 +59,18 @@
             \AtPageCenter{
                 \makebox(0,0)[c]{
                     \rotatebox{45}{
-                        \textcolor[gray]{0.97}{
-                            \fontsize{60}{70}\selectfont\sffamily\bfseries 
-                            {PHAN THÀNH HƯNG} 
+                        \textcolor[gray]{0.93}{
+                            \fontsize{50}{60}\selectfont\sffamily\bfseries 
+                            {\WatermarkText} 
                         }
                     }
                 }
                 \put(-130,220){
                     \makebox(0,0)[c]{
                         \rotatebox{45}{
-                            \textcolor[gray]{0.97}{
-                                \fontsize{25}{35}\selectfont\sffamily\bfseries 
-                                {PHAN THÀNH HƯNG} 
+                            \textcolor[gray]{0.93}{
+                                \fontsize{20}{30}\selectfont\sffamily\bfseries 
+                                {\WatermarkText} 
                             }
                         }
                     }
@@ -69,9 +78,9 @@
                 \put(130,-220){
                     \makebox(0,0)[c]{
                         \rotatebox{45}{
-                            \textcolor[gray]{0.97}{
-                                \fontsize{25}{35}\selectfont\sffamily\bfseries 
-                                {PHAN THÀNH HƯNG} 
+                            \textcolor[gray]{0.93}{
+                                \fontsize{20}{30}\selectfont\sffamily\bfseries 
+                                {\WatermarkText} 
                             }
                         }
                     }
@@ -92,7 +101,7 @@
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\headrule}{\vspace{-10pt}\hbox to\headwidth{\color{mainblue}\leaders\hrule height \headrulewidth\hfill}} 
 
-\fancyfoot[C]{\sffamily\thepage}
+\fancyfoot[C]{\sffamily\small Trang \thepage/\pageref{LastPage}}
 
 \newcommand{\hr}{\noindent\rule{\textwidth}{0.4pt}\vspace{10pt}}
 
@@ -129,7 +138,6 @@
     \end{itemize}
 }
 
-
 \newenvironment{makesample}{
     \par\medskip\noindent
     \begin{minipage}[t]{0.48\textwidth}
@@ -156,6 +164,9 @@
 
 \begin{document}
 
+\pagenumbering{arabic}
+
+\iftoggle{ShowTitlePage}{
 \begin{titlepage}
     \centering
     \vspace*{5cm}
@@ -168,15 +179,17 @@
     {\large Tác giả: \Author\par}
     \vfill
 \end{titlepage}
-
 \clearpage
+}{}
 
+\iftoggle{EnableWatermark}{
 \MyWatermark
+}{}
 
-\pagenumbering{roman}
+\iftoggle{ShowTOC}{
 \tableofcontents
 \clearpage
-\pagenumbering{arabic}
+}{}
 
 \input{contents.tex}
 

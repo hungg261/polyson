@@ -68,9 +68,27 @@ pip install -e .
   * *Runs recursively across all problems when executed inside a contest folder.*
 
 
-* **Compile LaTeX PDF:** `son pdf [*paths_or_contest.json]`
+* **Compile LaTeX PDF & Images:** `son pdf [*paths_or_contest.json] [options]`
   * *Compiles `statement.tex` from specified problem folder(s) or an entire contest into a unified PDF via `latexmk`.*
-  * *Example:* `son pdf` | `son pdf prob_a prob_b` | `son pdf fc_01/contest.json`
+  * *Examples:*
+  * `son pdf`
+  * `son pdf prob_a prob_b --open`
+  * `son pdf fc_01/contest.json --img`
+  * `son pdf --title "Free Contest 2026" --watermark "INTERNAL USE"`
+
+
+* *Options:*
+  * `--img`, `--image`: Render PDF pages as PNG images (150 DPI) and automatically bundle them into a `statements.zip` file.
+  * `--open`, `--view`: Automatically open the generated PDF or ZIP file upon completion.
+  * `--title "<text>"`: Set a custom title for the compiled document.
+  * `--no-title`: Hide the title page.
+  * `--no-toc`: Hide the Table of Contents.
+  * `--watermark "<text>"`: Set custom watermark text.
+  * `--no-watermark`: Disable watermark.
+  * `--header-left "<text>"`: Custom top-left page header.
+  * `--header-right "<text>"`: Custom top-right page header.
+
+
 
 
 * **Stress test (Infinite loop):** `son stress "<cmd>" <sol1> <sol2>`
