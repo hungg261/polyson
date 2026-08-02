@@ -437,3 +437,44 @@ def stress_test(ftl_command, sol1_path, sol2_path):
         for f in [gen_exe, chk_exe, sol1_exe, sol2_exe, "stress_input.tmp", "stress_ans.tmp", "stress_ouf.tmp"]:
             if os.path.exists(f):
                 os.remove(f)
+
+def shuffle_tests():
+    if not os.path.exists("problem.json") or not os.path.exists("tests"):
+        print("[ERROR] problem.json or tests directory missing.")
+        return
+
+    with open("problem.json", "r", encoding="utf-8") as f:
+        config = json.load(f)
+
+    in_ext = config.get("input_extension", ".in")
+    out_ext = config.get("output_extension", ".out")
+
+    test_pairs = []
+    for f in os.listdir("tests"):
+        full_path = os.path.join("tests", f)
+        if os.path.isfile(full_path) and (f.endswith(in_ext) if in_ext else True):
+            base_name = f[:-len(in_ext)] if in_ext else f
+            if base_name.isdigit():
+                out_file = f"{base_name}{out_ext}"
+                out_path = os.path.join("tests", out_file)
+                if os.path.exists(out_path):
+                    test_pairs.append((full_path, out_path))
+
+    if len(test_pairs) < 2:
+        print("[INFO] Not enough tests to shuffle.")
+        return
+
+    contents = []
+    for in_p, out_p in test_pairs:
+        with open(in_p, "r", encoding="utf-8", errors="ignore") as fi, open(out_p, "r", encoding="utf-8", errors="ignore") as fo:
+            contents.append((fi.read(), fo.read()))
+
+    shuffled_contents = contents.copy()
+    random.shuffle(shuffled_contents)
+
+    for (in_p, out_p), (in_data, out_data) in zip(test_pairs, shuffled_contents):
+        with open(in_p, "w", encoding="utf-8", newline='\n') as fi, open(out_p, "w", encoding="utf-8", newline='\n') as fo:
+            fi.write(in_data)
+            fo.write(out_data)
+
+    print(f"[SUCCESS] Shuffled contents of {len(test_pairs)} test pairs successfully.")

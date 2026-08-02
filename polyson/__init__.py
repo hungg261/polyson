@@ -1,5 +1,5 @@
 import sys
-from polyson.cli import create_problem, generate_and_validate, update_config, reset_problem, open_folder, validate_existing_tests, clean_binaries, show_status, stress_test
+from polyson.cli import create_problem, generate_and_validate, update_config, reset_problem, open_folder, validate_existing_tests, clean_binaries, show_status, stress_test, shuffle_tests
 
 def main():
     if len(sys.argv) < 2:
@@ -10,6 +10,7 @@ def main():
         print("  polyson reset                     -> Reset directory back to standard sample template")
         print("  polyson run                       -> Compile, generate, validate raw inputs")
         print("  polyson validate                  -> Run validator on all existing tests")
+        print("  polyson shuffle                   -> Shuffle test contents while preserving test filenames")
         print("  polyson clean                     -> Remove compiled binaries from your directory")
         print("  polyson status                    -> Display problem configuration profile overview")
         print("  polyson stress \"<cmd>\" <s1> <s2>  -> Infinite stress loop testing two distinct solutions")
@@ -38,6 +39,8 @@ def main():
         generate_and_validate()
     elif subcommand == "validate":
         validate_existing_tests()
+    elif subcommand == "shuffle":
+        shuffle_tests()
     elif subcommand == "clean":
         clean_binaries()
     elif subcommand == "status":
