@@ -518,7 +518,7 @@ def show_status():
                         script_count += 1
 
     print("========================================")
-    print("           POLYSON PROBLEM STATUS       ")
+    print("          POLYSON PROBLEM STATUS        ")
     print("========================================")
     print(f" Problem Name : {config.get('problem_name', 'Unknown')}")
     print(f" Source       : {config.get('source', 'unspecified')}")
@@ -528,6 +528,7 @@ def show_status():
     print(f" Solution File: {config.get('solution_file', 'Unknown')}")
     print(f" Input Ext    : '{in_ext}'")
     print(f" Output Ext   : '{config.get('output_extension', '.out')}'")
+    print(f" Checker      : {config.get('checker', 'ncmp')}")
     print(f" Tags         : {', '.join(config.get('tags', []))}")
     print("----------------------------------------")
     print(f" Custom Tests : {custom_count}")
@@ -535,8 +536,26 @@ def show_status():
     print("========================================")
 
 def stress_test(ftl_command, sol1_path, sol2_path):
-    if not os.path.exists("gen.cpp") or not os.path.exists("checker.cpp") or not os.path.exists(sol1_path) or not os.path.exists(sol2_path):
-        print("[ERROR] Stress test failed: Ensure gen.cpp, checker.cpp, and both solution files exist.")
+    base_dir = os.path.dirname(__file__)
+    chk_src = None
+
+    if os.path.exists("checker.cpp"):
+        chk_src = "checker.cpp"
+    else:
+        chk_name = "ncmp"
+        if os.path.exists("problem.json"):
+            try:
+                with open("problem.json", "r", encoding="utf-8") as f:
+                    chk_name = json.load(f).get("checker", "ncmp")
+            except Exception:
+                pass
+        
+        preset_path = os.path.join(base_dir, "defaults", "checkers", f"{chk_name}.cpp")
+        if os.path.exists(preset_path):
+            chk_src = preset_path
+
+    if not os.path.exists("gen.cpp") or not chk_src or not os.path.exists(sol1_path) or not os.path.exists(sol2_path):
+        print("[ERROR] Stress test failed: Ensure gen.cpp, checker, and both solution files exist.")
         return
 
     gen_exe = "generator.exe"
@@ -545,7 +564,7 @@ def stress_test(ftl_command, sol1_path, sol2_path):
     sol2_exe = "stress_sol2.exe"
 
     compile_cpp("gen.cpp", gen_exe)
-    compile_cpp("checker.cpp", chk_exe)
+    compile_cpp(chk_src, chk_exe, extra_args=["-I."])
     compile_cpp(sol1_path, sol1_exe)
     compile_cpp(sol2_path, sol2_exe)
 
@@ -553,7 +572,7 @@ def stress_test(ftl_command, sol1_path, sol2_path):
     iteration = 1
 
     print(f"[*] Starting infinite stress testing loop. Initial base seed: {seed}")
-    print(f"[*] Verifying solution via checker.cpp: {sol2_path}")
+    print(f"[*] Verifying solution via checker: {sol2_path}")
     print("----------------------------------------------------------------")
 
     try:
