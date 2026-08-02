@@ -3,10 +3,20 @@
 *.o
 *.obj
 
-**/tests/
+**/tests/*
+!**/tests/custom/
+!**/tests/custom/**
 
 __pycache__/
 *.pyc
 .DS_Store
 
 *.egg-info/
+
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.toc
+*.gz
+**/statements/main.pdf
