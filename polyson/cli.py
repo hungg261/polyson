@@ -21,6 +21,56 @@ def create_problem(name):
         
     print(f"[INFO] Successfully initialized a new problem at: '{name}'")
 
+def create_contest(args):
+    if not args:
+        print("[ERROR] Missing folder name. Usage: polyson contest <dir_name> [prob1 prob2 ...] [-n \"Contest Name\"]")
+        return
+
+    dir_name = args[0]
+    display_name = dir_name
+    problem_names = []
+
+    i = 1
+    while i < len(args):
+        arg = args[i]
+        if arg in ("-n", "--name"):
+            if i + 1 < len(args):
+                display_name = args[i + 1]
+                i += 2
+                continue
+            else:
+                print("[ERROR] Missing value for -n/--name flag.")
+                return
+        else:
+            problem_names.append(arg)
+            i += 1
+
+    if os.path.exists(dir_name):
+        print(f"[ERROR] Directory '{dir_name}' already exists!")
+        return
+
+    os.makedirs(dir_name)
+    cwd = os.getcwd()
+    os.chdir(dir_name)
+
+    print(f"[*] Initializing contest folder '{dir_name}' (Name: '{display_name}') with {len(problem_names)} problem(s)...")
+
+    created_problems = []
+    for p_name in problem_names:
+        create_problem(p_name)
+        created_problems.append(p_name)
+
+    contest_config = {
+        "contest_name": display_name,
+        "problems": created_problems
+    }
+
+    with open("contest.json", "w", encoding="utf-8") as f:
+        json.dump(contest_config, f, indent=4)
+
+    os.chdir(cwd)
+    print(f"[SUCCESS] Contest folder '{dir_name}' initialized successfully with contest.json!")
+
 def reset_problem():
     if not os.path.exists("problem.json") or not os.path.exists("script.ftl") or not os.path.exists("gen.cpp"):
         print("[ERROR] Execution error: You must be inside a valid problem directory to reset it.")
@@ -125,6 +175,27 @@ def update_config(key, value):
     print(f"[SUCCESS] Updated '{target_key}' to {value} in problem.json")
 
 def generate_and_validate():
+    if os.path.exists("contest.json"):
+        with open("contest.json", "r", encoding="utf-8") as f:
+            contest_data = json.load(f)
+        problems = contest_data.get("problems", [])
+        print(f"==================================================")
+        print(f"   RUNNING CONTEST: {contest_data.get('contest_name', 'Unknown')}")
+        print(f"==================================================")
+        cwd = os.getcwd()
+        for p in problems:
+            if os.path.exists(p) and os.path.isdir(p):
+                print(f"\n>>> [PROBLEM: {p}]")
+                os.chdir(p)
+                generate_and_validate()
+                os.chdir(cwd)
+            else:
+                print(f"\n[WARNING] Skipping non-existent problem folder: {p}")
+        print(f"\n==================================================")
+        print(f"[SUCCESS] Finished running all contest problems!")
+        print(f"==================================================")
+        return
+
     if not os.path.exists("problem.json") or not os.path.exists("script.ftl") or not os.path.exists("gen.cpp"):
         print("[ERROR] Execution error: Missing core files (problem.json, script.ftl, or gen.cpp).")
         return
@@ -229,6 +300,22 @@ def generate_and_validate():
     print("\n[SUCCESS] The 'tests/' directory has been formatted and is ready for Polygon upload.")
 
 def validate_existing_tests():
+    if os.path.exists("contest.json"):
+        with open("contest.json", "r", encoding="utf-8") as f:
+            contest_data = json.load(f)
+        problems = contest_data.get("problems", [])
+        print(f"==================================================")
+        print(f"   VALIDATING CONTEST: {contest_data.get('contest_name', 'Unknown')}")
+        print(f"==================================================")
+        cwd = os.getcwd()
+        for p in problems:
+            if os.path.exists(p) and os.path.isdir(p):
+                print(f"\n>>> [PROBLEM: {p}]")
+                os.chdir(p)
+                validate_existing_tests()
+                os.chdir(cwd)
+        return
+
     if not os.path.exists("problem.json") or not os.path.exists("tests"):
         print("[ERROR] problem.json or tests directory missing.")
         return
@@ -283,9 +370,77 @@ def validate_existing_tests():
 
     print("[SUCCESS] Validation process completed.")
 
+def shuffle_tests():
+    if os.path.exists("contest.json"):
+        with open("contest.json", "r", encoding="utf-8") as f:
+            contest_data = json.load(f)
+        problems = contest_data.get("problems", [])
+        print(f"==================================================")
+        print(f"   SHUFFLING CONTEST TESTS: {contest_data.get('contest_name', 'Unknown')}")
+        print(f"==================================================")
+        cwd = os.getcwd()
+        for p in problems:
+            if os.path.exists(p) and os.path.isdir(p):
+                print(f"\n>>> [PROBLEM: {p}]")
+                os.chdir(p)
+                shuffle_tests()
+                os.chdir(cwd)
+        return
+
+    if not os.path.exists("problem.json") or not os.path.exists("tests"):
+        print("[ERROR] problem.json or tests directory missing.")
+        return
+
+    with open("problem.json", "r", encoding="utf-8") as f:
+        config = json.load(f)
+
+    in_ext = config.get("input_extension", ".in")
+    out_ext = config.get("output_extension", ".out")
+
+    test_pairs = []
+    for f in os.listdir("tests"):
+        full_path = os.path.join("tests", f)
+        if os.path.isfile(full_path) and (f.endswith(in_ext) if in_ext else True):
+            base_name = f[:-len(in_ext)] if in_ext else f
+            if base_name.isdigit():
+                out_file = f"{base_name}{out_ext}"
+                out_path = os.path.join("tests", out_file)
+                if os.path.exists(out_path):
+                    test_pairs.append((full_path, out_path))
+
+    if len(test_pairs) < 2:
+        print("[INFO] Not enough tests to shuffle.")
+        return
+
+    contents = []
+    for in_p, out_p in test_pairs:
+        with open(in_p, "r", encoding="utf-8", errors="ignore") as fi, open(out_p, "r", encoding="utf-8", errors="ignore") as fo:
+            contents.append((fi.read(), fo.read()))
+
+    shuffled_contents = contents.copy()
+    random.shuffle(shuffled_contents)
+
+    for (in_p, out_p), (in_data, out_data) in zip(test_pairs, shuffled_contents):
+        with open(in_p, "w", encoding="utf-8", newline='\n') as fi, open(out_p, "w", encoding="utf-8", newline='\n') as fo:
+            fi.write(in_data)
+            fo.write(out_data)
+
+    print(f"[SUCCESS] Shuffled contents of {len(test_pairs)} test pairs successfully.")
+
 def clean_binaries():
-    binary_targets = ["generator.exe", "solution.exe", "validator.exe"]
-    latex_extensions = [".aux", ".fdb_latexmk", ".fls", ".log", ".toc"]
+    if os.path.exists("contest.json"):
+        with open("contest.json", "r", encoding="utf-8") as f:
+            contest_data = json.load(f)
+        problems = contest_data.get("problems", [])
+        cwd = os.getcwd()
+        for p in problems:
+            if os.path.exists(p) and os.path.isdir(p):
+                os.chdir(p)
+                clean_binaries()
+                os.chdir(cwd)
+
+    binary_targets = ["generator.exe", "solution.exe", "validator.exe", "checker.exe", "stress_sol1.exe", "stress_sol2.exe"]
+    latex_extensions = [".aux", ".fdb_latexmk", ".fls", ".log", ".toc", ".synctex.gz"]
     cleaned_any = False
     
     for f in binary_targets:
@@ -304,9 +459,30 @@ def clean_binaries():
     if cleaned_any:
         print("[SUCCESS] Workspace cleaned successfully.")
     else:
+
         print("[INFO] Nothing to clean. Workspace is already clean.")
 
 def show_status():
+    if os.path.exists("contest.json"):
+        with open("contest.json", "r", encoding="utf-8") as f:
+            contest_data = json.load(f)
+        problems = contest_data.get("problems", [])
+        print("========================================")
+        print("          POLYSON CONTEST STATUS        ")
+        print("========================================")
+        print(f" Contest Name : {contest_data.get('contest_name', 'Unknown')}")
+        print(f" Problems     : {', '.join(problems)}")
+        print("----------------------------------------")
+        cwd = os.getcwd()
+        for p in problems:
+            if os.path.exists(p) and os.path.isdir(p):
+                print(f"\n[Sub-Problem: {p}]")
+                os.chdir(p)
+                show_status()
+                os.chdir(cwd)
+        print("========================================")
+        return
+
     if not os.path.exists("problem.json"):
         print("[ERROR] problem.json not found in the current directory.")
         return
@@ -438,43 +614,96 @@ def stress_test(ftl_command, sol1_path, sol2_path):
             if os.path.exists(f):
                 os.remove(f)
 
-def shuffle_tests():
-    if not os.path.exists("problem.json") or not os.path.exists("tests"):
-        print("[ERROR] problem.json or tests directory missing.")
+def generate_pdf(paths):
+    base_dir = os.path.dirname(__file__)
+    statements_dir = os.path.join(base_dir, "defaults", "statements")
+    
+    if not os.path.exists(statements_dir):
+        print("[ERROR] Statements template directory missing in defaults.")
         return
 
-    with open("problem.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
+    contest_folder_pdf_name = None
+    target_paths = []
 
-    in_ext = config.get("input_extension", ".in")
-    out_ext = config.get("output_extension", ".out")
+    if len(paths) == 1 and paths[0].endswith("contest.json") and os.path.exists(paths[0]):
+        folder_path = os.path.dirname(os.path.abspath(paths[0]))
+        folder_name = os.path.basename(folder_path)
+        contest_folder_pdf_name = f"{folder_name}.pdf"
+        with open(paths[0], "r", encoding="utf-8") as f:
+            c_data = json.load(f)
+            target_paths = [os.path.join(folder_path, p) for p in c_data.get("problems", [])]
+    elif not paths and os.path.exists("contest.json"):
+        folder_name = os.path.basename(os.getcwd())
+        contest_folder_pdf_name = f"{folder_name}.pdf"
+        with open("contest.json", "r", encoding="utf-8") as f:
+            c_data = json.load(f)
+            target_paths = c_data.get("problems", [])
+    else:
+        target_paths = paths if paths else ["."]
 
-    test_pairs = []
-    for f in os.listdir("tests"):
-        full_path = os.path.join("tests", f)
-        if os.path.isfile(full_path) and (f.endswith(in_ext) if in_ext else True):
-            base_name = f[:-len(in_ext)] if in_ext else f
-            if base_name.isdigit():
-                out_file = f"{base_name}{out_ext}"
-                out_path = os.path.join("tests", out_file)
-                if os.path.exists(out_path):
-                    test_pairs.append((full_path, out_path))
+    valid_tex_files = []
+    for p in target_paths:
+        abs_p = os.path.abspath(p)
+        tex_file = os.path.join(abs_p, "statement.tex")
+        if os.path.exists(tex_file):
+            valid_tex_files.append(tex_file)
+        else:
+            print(f"[WARNING] Skipping '{p}': statement.tex not found.")
 
-    if len(test_pairs) < 2:
-        print("[INFO] Not enough tests to shuffle.")
+    if not valid_tex_files:
+        print("[ERROR] No valid statement.tex files found to compile.")
         return
 
-    contents = []
-    for in_p, out_p in test_pairs:
-        with open(in_p, "r", encoding="utf-8", errors="ignore") as fi, open(out_p, "r", encoding="utf-8", errors="ignore") as fo:
-            contents.append((fi.read(), fo.read()))
+    if not shutil.which("latexmk"):
+        print("[ERROR] 'latexmk' was not found in system PATH. Please ensure MiKTeX/TeX Live is installed.")
+        return
 
-    shuffled_contents = contents.copy()
-    random.shuffle(shuffled_contents)
+    build_dir = os.path.abspath(".polyson_pdf_build")
+    if os.path.exists(build_dir):
+        shutil.rmtree(build_dir)
+    os.makedirs(build_dir)
 
-    for (in_p, out_p), (in_data, out_data) in zip(test_pairs, shuffled_contents):
-        with open(in_p, "w", encoding="utf-8", newline='\n') as fi, open(out_p, "w", encoding="utf-8", newline='\n') as fo:
-            fi.write(in_data)
-            fo.write(out_data)
+    try:
+        for item in os.listdir(statements_dir):
+            s = os.path.join(statements_dir, item)
+            d = os.path.join(build_dir, item)
+            if os.path.isfile(s):
+                shutil.copy2(s, d)
 
-    print(f"[SUCCESS] Shuffled contents of {len(test_pairs)} test pairs successfully.")
+        contents_path = os.path.join(build_dir, "contents.tex")
+        with open(contents_path, "w", encoding="utf-8") as f:
+            for i, tex in enumerate(valid_tex_files):
+                formatted_path = tex.replace("\\", "/")
+                f.write(f"\\input{{{formatted_path}}}\n")
+                if i < len(valid_tex_files) - 1:
+                    f.write("\\clearpage\n")
+
+        print(f"[*] Compiling PDF using latexmk (-pdf) for {len(valid_tex_files)} problem(s)...")
+
+        subprocess.run(
+            ["latexmk", "-pdf", "-interaction=nonstopmode", "main.tex"],
+            cwd=build_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+
+        output_pdf = os.path.join(build_dir, "main.pdf")
+        if os.path.exists(output_pdf):
+            if contest_folder_pdf_name:
+                final_name = contest_folder_pdf_name
+            elif len(valid_tex_files) == 1 and paths:
+                prob_name = os.path.basename(os.path.abspath(paths[0]))
+                final_name = f"{prob_name}.pdf"
+            elif len(valid_tex_files) == 1 and not paths:
+                final_name = "statement.pdf"
+            else:
+                final_name = "contest.pdf"
+
+            shutil.copy2(output_pdf, os.path.join(os.getcwd(), final_name))
+            print(f"[SUCCESS] Generated PDF: {final_name}")
+        else:
+            print("[ERROR] LaTeX compilation failed. Please check your statement.tex syntax.")
+
+    finally:
+        if os.path.exists(build_dir):
+            shutil.rmtree(build_dir)

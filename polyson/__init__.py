@@ -1,19 +1,25 @@
 import sys
-from polyson.cli import create_problem, generate_and_validate, update_config, reset_problem, open_folder, validate_existing_tests, clean_binaries, show_status, stress_test, shuffle_tests
+from polyson.cli import (
+    create_problem, generate_and_validate, update_config, reset_problem,
+    open_folder, validate_existing_tests, clean_binaries, show_status,
+    stress_test, shuffle_tests, generate_pdf, create_contest
+)
 
 def main():
     if len(sys.argv) < 2:
         print("Polyson Usage Manual:")
-        print("  polyson init <problem_name>       -> Create a problem directory from the template")
-        print("  polyson config <key> <value>      -> Update property in problem.json")
-        print("  polyson open <location>           -> Open a directory or select a file in Explorer")
-        print("  polyson reset                     -> Reset directory back to standard sample template")
-        print("  polyson run                       -> Compile, generate, validate raw inputs")
-        print("  polyson validate                  -> Run validator on all existing tests")
-        print("  polyson shuffle                   -> Shuffle test contents while preserving test filenames")
-        print("  polyson clean                     -> Remove compiled binaries from your directory")
-        print("  polyson status                    -> Display problem configuration profile overview")
-        print("  polyson stress \"<cmd>\" <s1> <s2>  -> Infinite stress loop testing two distinct solutions")
+        print("  polyson init <problem_name>                     -> Create a problem directory from template")
+        print("  polyson contest <dir_name> [p1 p2..] [-n name]  -> Create a contest directory containing multiple problems")
+        print("  polyson config <key> <value>                    -> Update property in problem.json")
+        print("  polyson open <location>                         -> Open a directory or select a file in Explorer")
+        print("  polyson reset                                   -> Reset directory back to standard sample template")
+        print("  polyson run                                     -> Compile, generate, validate raw inputs")
+        print("  polyson validate                                -> Run validator on all existing tests")
+        print("  polyson shuffle                                 -> Shuffle test contents preserving filenames")
+        print("  polyson pdf [*paths_or_contest.json]            -> Compile statement.tex files into a unified PDF via latexmk")
+        print("  polyson clean                                   -> Remove compiled binaries from your directory")
+        print("  polyson status                                  -> Display problem configuration profile overview")
+        print("  polyson stress \"<cmd>\" <s1> <s2>                -> Infinite stress loop testing two distinct solutions")
         return
 
     subcommand = sys.argv[1].lower()
@@ -23,6 +29,11 @@ def main():
             print("[ERROR] Missing parameter. Usage: polyson init <problem_name>")
         else:
             create_problem(sys.argv[2])
+    elif subcommand == "contest":
+        if len(sys.argv) < 3:
+            print("[ERROR] Missing parameters. Usage: polyson contest <dir_name> [prob1 prob2 ...] [-n \"Display Name\"]")
+        else:
+            create_contest(sys.argv[2:])
     elif subcommand == "config":
         if len(sys.argv) < 4:
             print("[ERROR] Missing parameters. Usage: polyson config <key> <value>")
@@ -41,6 +52,8 @@ def main():
         validate_existing_tests()
     elif subcommand == "shuffle":
         shuffle_tests()
+    elif subcommand == "pdf":
+        generate_pdf(sys.argv[2:])
     elif subcommand == "clean":
         clean_binaries()
     elif subcommand == "status":
