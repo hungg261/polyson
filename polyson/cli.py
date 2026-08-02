@@ -13,11 +13,11 @@ def create_problem(name):
     
     base_dir = os.path.dirname(__file__)
     template_src = os.path.join(base_dir, "templates", "sample")
-    shutil.copytree(template_src, name)
+    shutil.copytree(template_src, name, copy_function=shutil.copy)
     
     shared_testlib = os.path.join(base_dir, "defaults", "testlib.h")
     if os.path.exists(shared_testlib):
-        shutil.copy2(shared_testlib, os.path.join(name, "testlib.h"))
+        shutil.copy(shared_testlib, os.path.join(name, "testlib.h"))
         
     print(f"[INFO] Successfully initialized a new problem at: '{name}'")
 
@@ -90,13 +90,13 @@ def reset_problem():
         if os.path.isdir(s):
             if os.path.exists(d):
                 shutil.rmtree(d)
-            shutil.copytree(s, d)
+            shutil.copytree(s, d, copy_function=shutil.copy)
         else:
-            shutil.copy2(s, d)
+            shutil.copy(s, d)
 
     shared_testlib = os.path.join(base_dir, "defaults", "testlib.h")
     if os.path.exists(shared_testlib):
-        shutil.copy2(shared_testlib, os.path.join(os.getcwd(), "testlib.h"))
+        shutil.copy(shared_testlib, os.path.join(os.getcwd(), "testlib.h"))
 
     print("[SUCCESS] Problem files and configuration have been reset to factory defaults.")
 
@@ -138,7 +138,7 @@ def update_config(key, value):
         filename = value if value.endswith(".cpp") else f"{value}.cpp"
         src_path = os.path.join(base_dir, "defaults", "checkers", filename)
         if os.path.exists(src_path):
-            shutil.copy2(src_path, "checker.cpp")
+            shutil.copy(src_path, "checker.cpp")
             print(f"[SUCCESS] Applied shared checker template: '{filename}' -> checker.cpp")
             return
         else:
@@ -149,7 +149,7 @@ def update_config(key, value):
         filename = value if value.endswith(".cpp") else f"{value}.cpp"
         src_path = os.path.join(base_dir, "defaults", "validators", filename)
         if os.path.exists(src_path):
-            shutil.copy2(src_path, "validator.cpp")
+            shutil.copy(src_path, "validator.cpp")
             print(f"[SUCCESS] Applied shared validator template: '{filename}' -> validator.cpp")
             return
         else:
@@ -668,7 +668,7 @@ def generate_pdf(paths):
             s = os.path.join(statements_dir, item)
             d = os.path.join(build_dir, item)
             if os.path.isfile(s):
-                shutil.copy2(s, d)
+                shutil.copy(s, d)
 
         contents_path = os.path.join(build_dir, "contents.tex")
         with open(contents_path, "w", encoding="utf-8") as f:
@@ -699,7 +699,7 @@ def generate_pdf(paths):
             else:
                 final_name = "contest.pdf"
 
-            shutil.copy2(output_pdf, os.path.join(os.getcwd(), final_name))
+            shutil.copy(output_pdf, os.path.join(os.getcwd(), final_name))
             print(f"[SUCCESS] Generated PDF: {final_name}")
         else:
             print("[ERROR] LaTeX compilation failed. Please check your statement.tex syntax.")
