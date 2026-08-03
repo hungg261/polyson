@@ -495,50 +495,86 @@ def clean_workspace():
 
 
 def show_status():
+    orig_cwd = os.getcwd()
+
     if os.path.exists("contest.json"):
-        with open("contest.json", "r", encoding="utf-8") as f:
-            contest_data = json.load(f)
-        problems = contest_data.get("problems", [])
-        print("========================================")
-        print("          POLYSON CONTEST STATUS        ")
-        print("========================================")
-        print(f" Contest Name : {contest_data.get('contest_name', 'Unknown')}")
-        print(f" Problems     : {', '.join(problems)}")
-        print("----------------------------------------")
-        cwd = os.getcwd()
-        for p in problems:
-            if os.path.exists(p) and os.path.isdir(p):
-                print(f"\n[Sub-Problem: {p}]")
-                os.chdir(p)
-                show_status()
-                os.chdir(cwd)
-        print("========================================")
+        try:
+            with open("contest.json", "r", encoding="utf-8") as f:
+                contest_data = json.load(f)
+            problems = contest_data.get("problems", [])
+            print("========================================")
+            print("          POLYSON CONTEST STATUS        ")
+            print("========================================")
+            print(f" Contest Name : {contest_data.get('contest_name', 'Unknown')}")
+            print(f" Problems     : {', '.join(problems)}")
+            print("----------------------------------------")
+            for p in problems:
+                p_path = os.path.join(orig_cwd, p)
+                if os.path.exists(p_path) and os.path.isdir(p_path):
+                    print(f"\n[Sub-Problem: {p}]")
+                    os.chdir(p_path)
+                    show_status()
+                    os.chdir(orig_cwd)
+            print("========================================")
+        finally:
+            os.chdir(orig_cwd)
         return
 
     if not os.path.exists("problem.json"):
-        print("[ERROR] problem.json not found in the current directory.")
+        print(f"[ERROR] problem.json not found in {orig_cwd}")
         return
 
     with open("problem.json", "r", encoding="utf-8") as f:
         config = json.load(f)
 
-    base_dir = os.path.dirname(__file__)
-    defaults_dir = os.path.join(base_dir, "defaults")
+    pkg_dir = os.path.dirname(os.path.realpath(__file__))
+    possible_tpl_dirs = [
+        os.path.join(pkg_dir, "templates", "sample"),
+        os.path.join(pkg_dir, "polyson", "templates", "sample"),
+        os.path.join(os.path.dirname(pkg_dir), "templates", "sample"),
+        os.path.join(os.path.dirname(pkg_dir), "polyson", "templates", "sample")
+    ]
+    
+    defaults_dir = None
+    for chk_dir in possible_tpl_dirs:
+        if os.path.exists(chk_dir) and os.path.isdir(chk_dir):
+            defaults_dir = chk_dir
+            break
 
-    def check_file_status(file_path, default_template_name=None):
-        if not os.path.exists(file_path):
+    def normalize_code(text):
+        lines = [line.strip() for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")]
+        return "\n".join([line for line in lines if line])
+
+    def check_file_status(file_path, possible_tpl_names):
+        full_file_path = os.path.join(orig_cwd, file_path)
+        if not os.path.exists(full_file_path):
             return "[MISSING]"
-        if default_template_name:
-            tpl_path = os.path.join(defaults_dir, default_template_name)
+        
+        if not defaults_dir:
+            return "[UNKNOWN]"
+
+        if isinstance(possible_tpl_names, str):
+            possible_tpl_names = [possible_tpl_names]
+
+        found_template = False
+        for tpl_name in possible_tpl_names:
+            tpl_path = os.path.join(defaults_dir, tpl_name)
             if os.path.exists(tpl_path):
+                found_template = True
                 try:
-                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f1, \
+                    with open(full_file_path, "r", encoding="utf-8", errors="ignore") as f1, \
                          open(tpl_path, "r", encoding="utf-8", errors="ignore") as f2:
-                        if f1.read().strip() == f2.read().strip():
-                            return "[UNCHANGED / DEFAULT]"
+                        c1 = normalize_code(f1.read())
+                        c2 = normalize_code(f2.read())
+                        if c1 == c2:
+                            return "[DEFAULT]"
                 except Exception:
                     pass
-        return "[OK / MODIFIED]"
+        
+        if not found_template:
+            return "[UNKNOWN]"
+
+        return "[MODIFIED]"
 
     in_ext = config.get("input_extension", ".in")
 
@@ -567,34 +603,43 @@ def show_status():
                         script_count += 1
 
     sol_file = config.get("solution_file", "solutions/solution.cpp")
-    checker_type = config.get("checker", "ncmp")
+    checker_type = config.get("checker", None)
     builtin_checkers = ["ncmp", "wcmp", "lcmp", "rcmp", "fcmp", "uncmp", "yesno", "acmp", "case1", "casen", "lines", "nums"]
-
-    sol_tpl_name = "solution.cpp" if os.path.basename(sol_file) == "solution.cpp" else None
 
     print("========================================")
     print("          POLYSON PROBLEM STATUS        ")
     print("========================================")
-    print(f" Problem Name : {config.get('problem_name', 'Unknown')}")
+    print(f" Problem Name : {config.get('problem_name', 'unspecified')}")
     print(f" Source       : {config.get('source', 'unspecified')}")
-    print(f" Rating       : {config.get('rating', 'unspecified')}")
+    print(f" Rating       : {config.get('rating', 0)}")
     print(f" Time Limit   : {config.get('time_limit_ms', 1000)} ms")
     print(f" Memory Limit : {config.get('memory_limit_mb', 256)} MB")
     print(f" Solution File: {sol_file}")
     print(f" Input Ext    : '{in_ext}'")
     print(f" Output Ext   : '{config.get('output_extension', '.out')}'")
-    print(f" Checker      : {checker_type}")
-    print(f" Tags         : {', '.join(config.get('tags', []))}")
+    print(f" Checker      : {checker_type if checker_type else 'default (ncmp)'}")
+    print(f" Tags         : {', '.join(config.get('tags', ['unspecified']))}")
     print("----------------------------------------")
     print(" FILE CHECKLIST:")
-    print(f"  - Solution   : {check_file_status(sol_file, sol_tpl_name)}")
-    print(f"  - Generator  : {check_file_status('gen.cpp', 'gen.cpp')}")
-    print(f"  - Validator  : {check_file_status('validator.cpp', 'val.cpp')}")
-    if checker_type.endswith(".cpp") or checker_type not in builtin_checkers:
-        chk_file = checker_type if checker_type.endswith(".cpp") else "checker.cpp"
-        print(f"  - Checker    : {check_file_status(chk_file, 'checker.cpp')}")
+    print(f"  - Solution   : {check_file_status(sol_file, ['solutions/solution.cpp', 'solution.cpp', 'sol.cpp'])}")
+    print(f"  - Generator  : {check_file_status('gen.cpp', ['gen.cpp', 'generator.cpp'])}")
+    print(f"  - Validator  : {check_file_status('validator.cpp', ['validator.cpp', 'val.cpp'])}")
+
+    if checker_type and checker_type in builtin_checkers:
+        print(f"  - Checker    : [BUILT-IN] ({checker_type})")
+    elif os.path.exists("checker.cpp"):
+        st = check_file_status("checker.cpp", ["checker.cpp", "chk.cpp"])
+        print(f"  - Checker    : {st}")
+    elif checker_type and (checker_type.endswith(".cpp") or checker_type not in builtin_checkers):
+        chk_file = checker_type if checker_type.endswith(".cpp") else f"{checker_type}.cpp"
+        if os.path.exists(chk_file):
+            st = check_file_status(chk_file, ["checker.cpp", "chk.cpp"])
+            print(f"  - Checker    : {st}")
+        else:
+            print("  - Checker    : [MISSING]")
     else:
-        print(f"  - Checker    : [OK / BUILT-IN] ({checker_type})")
+        print("  - Checker    : [BUILT-IN] (ncmp)")
+
     print("----------------------------------------")
     print(f" Custom Tests : {custom_count}")
     print(f" Script Tests : {script_count}")
