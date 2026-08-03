@@ -33,7 +33,7 @@ pip install -e .
 
 
 * **Check status:** `son status`
-  * *Displays current problem or contest metadata, configurations, and test counts.*
+  * *Displays current problem or contest metadata, configurations, test counts, and checklist.*
 
 
 * **Reset problem:** `son reset`
@@ -104,5 +104,5 @@ pip install -e .
 
 
 * **Clean binaries:** `son clean`
-  * *Removes compiled executables (`*.exe`) and LaTeX build auxiliary files.*
+  * *Removes compiled executables (`*.exe`), LaTeX build auxiliary files and unused checker files.*
   * *Cleans all sub-problem folders when executed inside a contest folder.*

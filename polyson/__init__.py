@@ -1,7 +1,7 @@
 import sys
 from polyson.cli import (
     create_problem, generate_and_validate, update_config, reset_problem,
-    open_folder, validate_existing_tests, clean_binaries, show_status,
+    open_folder, validate_existing_tests, clean_workspace, show_status,
     stress_test, shuffle_tests, generate_pdf, create_contest
 )
 
@@ -55,7 +55,7 @@ def main():
     elif subcommand == "pdf":
         generate_pdf(sys.argv[2:])
     elif subcommand == "clean":
-        clean_binaries()
+        clean_workspace()
     elif subcommand == "status":
         show_status()
     elif subcommand == "stress":

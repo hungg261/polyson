@@ -428,7 +428,9 @@ def shuffle_tests():
 
     print(f"[SUCCESS] Shuffled contents of {len(test_pairs)} test pairs successfully.")
 
-def clean_binaries():
+def clean_workspace():
+    targets = []
+
     if os.path.exists("contest.json"):
         with open("contest.json", "r", encoding="utf-8") as f:
             contest_data = json.load(f)
@@ -437,31 +439,60 @@ def clean_binaries():
         for p in problems:
             if os.path.exists(p) and os.path.isdir(p):
                 os.chdir(p)
-                clean_binaries()
+                clean_workspace()
                 os.chdir(cwd)
 
     binary_targets = ["generator.exe", "solution.exe", "validator.exe", "checker.exe", "stress_sol1.exe", "stress_sol2.exe"]
     latex_extensions = [".aux", ".fdb_latexmk", ".fls", ".log", ".toc", ".synctex.gz"]
-    cleaned_any = False
-    
+    temp_prefixes = ["stress_", "temp_"]
+
     for f in binary_targets:
         if os.path.exists(f):
-            os.remove(f)
-            print(f"[INFO] Removed binary: {f}")
-            cleaned_any = True
+            targets.append(f)
+
+    if os.path.exists("problem.json"):
+        try:
+            with open("problem.json", "r", encoding="utf-8") as f:
+                config = json.load(f)
+            checker_type = config.get("checker", "ncmp")
+            builtin_checkers = ["ncmp", "wcmp", "lcmp", "rcmp", "fcmp", "uncmp", "yesno", "acmp", "case1", "casen", "lines", "nums"]
+            if checker_type in builtin_checkers and os.path.exists("checker.cpp"):
+                targets.append("checker.cpp")
+        except Exception:
+            pass
 
     for f in os.listdir("."):
         if os.path.isfile(f):
-            if any(f.endswith(ext) for ext in latex_extensions):
-                os.remove(f)
-                print(f"[INFO] Removed auxiliary file: {f}")
-                cleaned_any = True
-            
-    if cleaned_any:
-        print("[SUCCESS] Workspace cleaned successfully.")
-    else:
+            if any(f.endswith(ext) for ext in latex_extensions) or any(f.startswith(pref) for pref in temp_prefixes):
+                if f not in targets:
+                    targets.append(f)
 
+    if not targets:
         print("[INFO] Nothing to clean. Workspace is already clean.")
+        return
+
+    print("========================================")
+    print("          FILES TO BE REMOVED           ")
+    print("========================================")
+    for item in targets:
+        print(f" - {item}")
+    print("========================================")
+
+    confirm = input("Are you sure you want to delete these items? [y/N]: ").strip().lower()
+    if confirm not in ["y", "yes"]:
+        print("[*] Clean operation cancelled.")
+        return
+
+    for item in targets:
+        try:
+            if os.path.isdir(item):
+                shutil.rmtree(item)
+            elif os.path.isfile(item):
+                os.remove(item)
+            print(f"[+] Removed: {item}")
+        except Exception as e:
+            print(f"[!] Failed to remove {item}: {e}")
+
 
 def show_status():
     if os.path.exists("contest.json"):
@@ -491,8 +522,26 @@ def show_status():
     with open("problem.json", "r", encoding="utf-8") as f:
         config = json.load(f)
 
+    base_dir = os.path.dirname(__file__)
+    defaults_dir = os.path.join(base_dir, "defaults")
+
+    def check_file_status(file_path, default_template_name=None):
+        if not os.path.exists(file_path):
+            return "[MISSING]"
+        if default_template_name:
+            tpl_path = os.path.join(defaults_dir, default_template_name)
+            if os.path.exists(tpl_path):
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="ignore") as f1, \
+                         open(tpl_path, "r", encoding="utf-8", errors="ignore") as f2:
+                        if f1.read().strip() == f2.read().strip():
+                            return "[UNCHANGED / DEFAULT]"
+                except Exception:
+                    pass
+        return "[OK / MODIFIED]"
+
     in_ext = config.get("input_extension", ".in")
-    
+
     custom_count = 0
     if os.path.exists("tests/custom"):
         for f in os.listdir("tests/custom"):
@@ -517,6 +566,12 @@ def show_status():
                     if f.isdigit():
                         script_count += 1
 
+    sol_file = config.get("solution_file", "solutions/solution.cpp")
+    checker_type = config.get("checker", "ncmp")
+    builtin_checkers = ["ncmp", "wcmp", "lcmp", "rcmp", "fcmp", "uncmp", "yesno", "acmp", "case1", "casen", "lines", "nums"]
+
+    sol_tpl_name = "solution.cpp" if os.path.basename(sol_file) == "solution.cpp" else None
+
     print("========================================")
     print("          POLYSON PROBLEM STATUS        ")
     print("========================================")
@@ -525,11 +580,21 @@ def show_status():
     print(f" Rating       : {config.get('rating', 'unspecified')}")
     print(f" Time Limit   : {config.get('time_limit_ms', 1000)} ms")
     print(f" Memory Limit : {config.get('memory_limit_mb', 256)} MB")
-    print(f" Solution File: {config.get('solution_file', 'Unknown')}")
+    print(f" Solution File: {sol_file}")
     print(f" Input Ext    : '{in_ext}'")
     print(f" Output Ext   : '{config.get('output_extension', '.out')}'")
-    print(f" Checker      : {config.get('checker', 'ncmp')}")
+    print(f" Checker      : {checker_type}")
     print(f" Tags         : {', '.join(config.get('tags', []))}")
+    print("----------------------------------------")
+    print(" FILE CHECKLIST:")
+    print(f"  - Solution   : {check_file_status(sol_file, sol_tpl_name)}")
+    print(f"  - Generator  : {check_file_status('gen.cpp', 'gen.cpp')}")
+    print(f"  - Validator  : {check_file_status('validator.cpp', 'val.cpp')}")
+    if checker_type.endswith(".cpp") or checker_type not in builtin_checkers:
+        chk_file = checker_type if checker_type.endswith(".cpp") else "checker.cpp"
+        print(f"  - Checker    : {check_file_status(chk_file, 'checker.cpp')}")
+    else:
+        print(f"  - Checker    : [OK / BUILT-IN] ({checker_type})")
     print("----------------------------------------")
     print(f" Custom Tests : {custom_count}")
     print(f" Script Tests : {script_count}")
