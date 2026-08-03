@@ -81,6 +81,8 @@ pip install -e .
   * `--img`, `--image`: Render PDF pages as PNG images (150 DPI) and automatically bundle them into a `statements.zip` file.
   * `--open`, `--view`: Automatically open the generated PDF or ZIP file upon completion.
   * `--title "<text>"`: Set a custom title for the compiled document.
+  * `--subtitle "<text>"`: Set a custom subtitle for the compiled document.
+  * `--open`, `--view`: Automatically open the generated PDF or ZIP file upon completion.
   * `--no-title`: Hide the title page.
   * `--no-toc`: Hide the Table of Contents.
   * `--watermark "<text>"`: Set custom watermark text.

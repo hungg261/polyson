@@ -649,6 +649,7 @@ def generate_pdf(args):
     open_after_build = False
     export_images = False
     custom_title = None
+    custom_subtitle = None
     custom_hl = None
     custom_hr = None
 
@@ -671,6 +672,9 @@ def generate_pdf(args):
             show_toc = False
         elif arg == "--title" and i + 1 < len(args):
             custom_title = args[i+1]
+            i += 1
+        elif arg == "--subtitle" and i + 1 < len(args):
+            custom_subtitle = args[i+1]
             i += 1
         elif arg == "--header-left" and i + 1 < len(args):
             custom_hl = args[i+1]
@@ -737,6 +741,7 @@ def generate_pdf(args):
 
     watermark_text = clean_latex(watermark_text)
     custom_title = clean_latex(custom_title)
+    custom_subtitle = clean_latex(custom_subtitle)
     custom_hl = clean_latex(custom_hl)
     custom_hr = clean_latex(custom_hr)
 
@@ -762,6 +767,8 @@ def generate_pdf(args):
                 f.write(f"\\renewcommand{{\\WatermarkText}}{{{watermark_text}}}\n")
             if custom_title:
                 f.write(f"\\renewcommand{{\\Title}}{{{custom_title}}}\n")
+            if custom_subtitle:
+                f.write(f"\\renewcommand{{\\Subtitle}}{{{custom_subtitle}}}\n")
             if custom_hl:
                 f.write(f"\\renewcommand{{\\HeaderL}}{{{custom_hl}}}\n")
             if custom_hr:
