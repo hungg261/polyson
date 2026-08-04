@@ -5,6 +5,7 @@ from polyson.cli import (
     stress_test, shuffle_tests, generate_pdf, create_contest
 )
 from polyson.sync import sync_problem
+from polyson.agent import run_agent
 
 def main():
     if len(sys.argv) < 2:
@@ -22,6 +23,7 @@ def main():
         print("  polyson status                                     -> Display problem configuration profile overview")
         print("  polyson stress \"<cmd>\" <s1> <s2>                 -> Infinite stress loop testing two distinct solutions")
         print("  polyson sync [short_name] [--path <dir>]           -> Synchronize local problem configuration and assets")
+        print("  polyson gen                                        -> Use AI to generate codes")
         return
 
     subcommand = sys.argv[1].lower()
@@ -67,6 +69,8 @@ def main():
             stress_test(sys.argv[2], sys.argv[3], sys.argv[4])
     elif subcommand == "sync":
         sync_problem(sys.argv[2:])
+    elif subcommand == "agent":
+        run_agent()
     else:
         print(f"[ERROR] Unknown command: '{subcommand}'")
 
