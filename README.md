@@ -90,19 +90,17 @@ pip install -e .
   * `--header-left "<text>"`: Custom top-left page header.
   * `--header-right "<text>"`: Custom top-right page header.
 
-
-
-
 * **Stress test (Infinite loop):** `son stress "<cmd>" <sol1> <sol2>`
   * *Generates test cases on the fly to compare two solutions until a mismatch or crash occurs.*
   * *Example:* `son stress "gen ${seed} 1 100" solutions/sol.cpp solutions/brute.cpp`
   * *Stop:* Press `Ctrl + C`
 
-
 * **Open in Explorer:** `son open <path>`
   * *Opens the specified file or folder directly in Windows Explorer.*
-
 
 * **Clean binaries:** `son clean`
   * *Removes compiled executables (`*.exe`), LaTeX build auxiliary files and unused checker files.*
   * *Cleans all sub-problem folders when executed inside a contest folder.*
+
+* **Sync to Polygon:** `polyson sync [short_name] [--path <dir>]`
+  * *Sync most files to Polygon through API, requires key and secret.*
