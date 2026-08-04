@@ -1,6 +1,6 @@
 {
     "problem_name": "unspecified",
-    "solution_file": "solutions/solution.cpp",
+    "solution_file": "solutions/ma_solution.cpp",
     "input_extension": ".in",
     "output_extension": ".out",
     "source": "unspecified",

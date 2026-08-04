@@ -204,7 +204,7 @@ def generate_and_validate():
     with open("problem.json", "r", encoding="utf-8") as f:
         config = json.load(f)
     
-    sol_src = config.get("solution_file", "solutions/solution.cpp")
+    sol_src = config.get("solution_file", "solutions/ma_solution.cpp")
     in_ext = config.get("input_extension", ".in")
     out_ext = config.get("output_extension", ".out")
 
@@ -602,7 +602,7 @@ def show_status():
                     if f.isdigit():
                         script_count += 1
 
-    sol_file = config.get("solution_file", "solutions/solution.cpp")
+    sol_file = config.get("solution_file", "solutions/ma_solution.cpp")
     checker_type = config.get("checker", None)
     builtin_checkers = ["ncmp", "wcmp", "lcmp", "rcmp", "fcmp", "uncmp", "yesno", "acmp", "case1", "casen", "lines", "nums"]
 
@@ -621,7 +621,7 @@ def show_status():
     print(f" Tags         : {', '.join(config.get('tags', ['unspecified']))}")
     print("----------------------------------------")
     print(" FILE CHECKLIST:")
-    print(f"  - Solution   : {check_file_status(sol_file, ['solutions/solution.cpp', 'solution.cpp', 'sol.cpp'])}")
+    print(f"  - Solution   : {check_file_status(sol_file, ['solutions/ma_solution.cpp', 'ma_solution.cpp', 'sol.cpp'])}")
     print(f"  - Generator  : {check_file_status('gen.cpp', ['gen.cpp', 'generator.cpp'])}")
     print(f"  - Validator  : {check_file_status('validator.cpp', ['validator.cpp', 'val.cpp'])}")
 
