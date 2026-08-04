@@ -171,17 +171,37 @@
 \thispagestyle{empty}
 \begin{center}
     \sffamily
-    \vspace*{5cm}
+    \vspace*{3cm}
     {\Huge\bfseries \Title\par}
     \vspace{0.5cm}
     {\Large\bfseries \Subtitle\par}
     \hr
-    \vspace{1cm}
+    \vspace{0.8cm}
     {\large Tác giả: \Author\par}
     \vfill
+    \setlength{\fboxsep}{10pt} % Khoảng cách từ chữ đến khung viền
+    \fbox{
+        \begin{minipage}{0.82\textwidth}
+            \small
+            \textbf{LƯU Ý:}
+            \begin{itemize}
+                \setlength{\itemsep}{0pt}
+                \setlength{\parskip}{0pt}
+                \item Đề bài được tổng hợp và biên soạn từ nhiều nguồn kiểm tra.
+                \item Các bộ test dữ liệu do tác giả tự sinh, không phải bộ test chính thức.
+                \item Nội dung mang tính chất tham khảo, không có giá trị cung cấp điểm số thực tế.
+                \item Mọi phản hồi về sai sót hoặc đóng góp ý kiến xin vui lòng liên hệ tác giả.
+                \vspace*{0.25cm}
+                \item Bộ test tuân theo định dạng Polygon, sử dụng \texttt{testlib.h}.
+                \item Toàn bộ mã nguồn được công khai tại: \url{https://github.com/hungg261/hsg-problem-archive/tree/main/problems/2023/HCM-TS10}.
+            \end{itemize}
+        \end{minipage}
+    }
+    \vspace*{0.5cm}
 \end{center}
 \clearpage
 }{}
+
 
 \iftoggle{EnableWatermark}{
 \MyWatermark
