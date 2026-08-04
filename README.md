@@ -54,7 +54,7 @@ pip install -e .
 
 
 * **Generate tests:** `son run`
-  * *Compiles `gen.cpp`, runs `script.ftl` commands, validates inputs, and generates outputs via `solution.cpp`.*
+  * *Compiles `gen.cpp`, runs `script.ftl` commands, validates inputs, and generates outputs via solution file.*
   * *Runs recursively across all problems when executed inside a contest folder.*
 
 
