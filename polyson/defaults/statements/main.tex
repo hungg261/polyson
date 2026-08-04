@@ -101,14 +101,14 @@
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\headrule}{\vspace{-10pt}\hbox to\headwidth{\color{mainblue}\leaders\hrule height \headrulewidth\hfill}} 
 
-\fancyfoot[C]{\sffamily\small Trang \thepage/\pageref{LastPage}}
+\fancyfoot[C]{\small Trang \thepage/\pageref{LastPage}}
 
 \newcommand{\hr}{\noindent\rule{\textwidth}{0.4pt}\vspace{10pt}}
 
 \newcommand{\makeproblem}[4]{
     \newpage
     \phantomsection
-    \addcontentsline{toc}{section}{Đề bài: #2}
+    \addcontentsline{toc}{section}{#2}
     \begin{center}
         {\large \textbf{#1 -- #2}} \\
         \vspace{5pt}
@@ -147,11 +147,11 @@
     \par\vspace{10pt}
 }
 
-\newcommand{\nextsample}{%
-    \end{minipage}%
-    \hfill%
-    \begin{minipage}[t]{0.48\textwidth}%
-    \textbf{Output:}%
+\newcommand{\nextsample}{
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+    \textbf{Output:}
 }
 
 \newenvironment{explain}{
@@ -161,16 +161,17 @@
 }
 
 \setlength{\parindent}{0pt}
+\tocloftpagestyle{fancy}
 
 \begin{document}
 
 \pagenumbering{arabic}
 
 \iftoggle{ShowTitlePage}{
-\begin{titlepage}
-    \centering
-    \vspace*{5cm}
+\thispagestyle{empty}
+\begin{center}
     \sffamily
+    \vspace*{5cm}
     {\Huge\bfseries \Title\par}
     \vspace{0.5cm}
     {\Large\bfseries \Subtitle\par}
@@ -178,7 +179,7 @@
     \vspace{1cm}
     {\large Tác giả: \Author\par}
     \vfill
-\end{titlepage}
+\end{center}
 \clearpage
 }{}
 
