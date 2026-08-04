@@ -20,3 +20,5 @@ __pycache__/
 *.toc
 *.gz
 **/statements/main.pdf
+
+.env
