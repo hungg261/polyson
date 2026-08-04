@@ -10,6 +10,9 @@ def evaluate_expression(expr, ctx):
         return expr.strip()
 
 def parse_freemarker_polygon(ftl_content):
+    ftl_content = re.sub(r"<!--.*?-->", "", ftl_content, flags=re.DOTALL)
+    ftl_content = re.sub(r"<#--.*?-->", "", ftl_content, flags=re.DOTALL)
+    
     context = {}
     assign_pattern = r"<#assign\s+(\w+)\s*=\s*([^>]+)>"
     
