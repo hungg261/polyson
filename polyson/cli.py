@@ -10,12 +10,12 @@ from .modules import (
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Polyson - Bộ công cụ quản lý và cấu hình bài tập chuẩn hóa.",
+        description="Polyson - A toolset for managing and configuring standardized problem packages.",
         formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument("-v", "--version", action="version", version=f"Polyson version {__version__}")
     
-    subparsers = parser.add_subparsers(dest="subcommand", title="Danh sách câu lệnh (Subcommands)")
+    subparsers = parser.add_subparsers(dest="subcommand", title="Available Subcommands")
 
     p_init = subparsers.add_parser("init", help="Create a problem directory from template")
     p_init.add_argument("problem_name")
