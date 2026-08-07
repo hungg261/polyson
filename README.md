@@ -1,10 +1,17 @@
 # Polyson
 
-![Polyson's logo](assets/logo.png)
+
+<img src="assets/logo.png" alt="Project Logo" width="150">
+<img src="assets/meme.png" alt="Project Logo" width="150">
+
+<center><small>PolySON</small></center>
+
 
 Offline Windows CLI tool to simulate Codeforces Polygon workflow.
 
-> **Note:** Windows-only tool. Requires `g++` (MinGW) and `latexmk` (MiKTeX / TeX Live) available in system `PATH`.
+> **Note:**
+> * Windows-only tool. Requires `g++` (MinGW) and `latexmk` (MiKTeX / TeX Live) available in system `PATH`.
+> * The logo of Polyson is also the logo of [Problemset Archive](https://github.com/hungg261/problemset-template).
 
 ---
 
