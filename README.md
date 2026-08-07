@@ -111,3 +111,11 @@ pip install -e .
 
 * **Sync to Polygon:** `polyson sync [short_name] [--path <dir>]`
   * *Sync most files to Polygon through API, requires key and secret.*
+
+## License & Trademark
+
+Polyson's name, logo, and brand identity are trademark and copyright protected, and are explicitly excluded from the MIT License. 
+
+If you fork, modify, or host this project, you must completely remove all Polyson logos, branding, and name assets before publication. Commercial use of the brand or any implied endorsement is strictly prohibited without explicit written permission.
+
+The underlying source code of this project remains fully licensed under the [MIT License](LICENSE).
