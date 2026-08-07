@@ -119,3 +119,4 @@ Polyson's name, logo, and brand identity are trademark and copyright protected, 
 If you fork, modify, or host this project, you must completely remove all Polyson logos, branding, and name assets before publication. Commercial use of the brand or any implied endorsement is strictly prohibited without explicit written permission.
 
 The underlying source code of this project remains fully licensed under the [MIT License](LICENSE).
+Furthermore, this license does NOT apply to media assets located in the assets folder, including [meme.png](assets/meme.png).
